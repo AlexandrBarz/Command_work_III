@@ -1,4 +1,5 @@
 import logging
+import add_c
 from config import TOKEN 
 from logger import write_log
 
@@ -61,14 +62,14 @@ def choise(update, _):
     # переходим к этапу `GENDER`, это значит, что ответ
     # отправленного сообщения в виде кнопок будет список 
     # обработчиков, определенных в виде значения ключа `GENDER`
-    return 1
+    return MENU
 
 # Обрабатываем выбор пользователя
 def parse_choise(update, _):
     write_log(update, _)
     choise = update.message.text
-    print('Выбор равен', choise )
-    if choise == 'Add contact':
+    update.message.reply_text('введите с клавиатуры')    
+    if choise == 'Add contact':          
         return ADD 
     elif choise == 'Find contact':
         return FIND
@@ -83,15 +84,18 @@ def parse_choise(update, _):
 def add(update, _):
     # определяем пользователя
     write_log(update, _)
-    user = update.message.from_user
-    # Пишем в журнал биографию или рассказ пользователя
-    logger.info("Пользователь %s выбрал: %s", user.first_name, update.message.text)
-    # Отвечаем на то что пользователь рассказал.
-    update.message.reply_text('Вы выбрали добавить контакт'
-        'Команда /choise, чтобы перейти к меню.\n'
-        'Команда /cancel, чтобы завершить.\n')
+     
+    add_c.add_contact()
+     
+    # user = update.message.from_user
+    # # Пишем в журнал биографию или рассказ пользователя
+    # logger.info("Пользователь %s выбрал: %s", user.first_name, update.message.text)
+    # # Отвечаем на то что пользователь рассказал.
+    # update.message.reply_text('Вы выбрали добавить контакт'
+    #     'Команда /choise, чтобы перейти к меню.\n'
+    #     'Команда /cancel, чтобы завершить.\n')
     # возвращаемся к меню
-    return 
+    return MENU 
 
 def find(update, _):
     # определяем пользователя
@@ -103,7 +107,7 @@ def find(update, _):
         'Команда /choise, чтобы перейти к меню.\n'
         'Команда /cancel, чтобы завершить.\n')
     # возвращаемся к меню
-    return 
+    return MENU
 
 def change(update, _):
     # определяем пользователя
