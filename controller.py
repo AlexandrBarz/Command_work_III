@@ -11,6 +11,9 @@ from telegram.ext import (
     ConversationHandler,
 )
 
+# Определяем константы этапов разговора
+MENU, ADD, FIND, CHANGE, DELETE = range(5)
+
 # Включим ведение журнала
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -24,11 +27,10 @@ def cancel(update, _):
     user = update.message.from_user
     write_log(update, _)
     # Пишем в журнал о том, что пользователь не разговорчивый
-    logger.info("Пользователь %s отменил разговор.", user.first_name)
+    logger.info("Пользователь %s завершил работу.", user.first_name)
     # Отвечаем на отказ поговорить
     update.message.reply_text(
-        'Мое дело предложить - Ваше отказаться'
-        ' Будет скучно - пиши.', 
+        'Работа завершена', 
         reply_markup=ReplyKeyboardRemove()
     )
     # Заканчиваем разговор.
@@ -46,7 +48,7 @@ def start(update, _):
 def choise(update, _):
     # Список кнопок для ответа 
     write_log(update, _)   
-    reply_keyboard = [['Add contact', 'Find contact', 'Delete contact', 'Change contact']]
+    reply_keyboard = [['Add contact', 'Find contact', 'Change contact', 'Delete contact']]
     # Создаем простую клавиатуру для ответа
     markup_key = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
     # Начинаем разговор с вопроса
@@ -61,32 +63,71 @@ def choise(update, _):
     # обработчиков, определенных в виде значения ключа `GENDER`
     return 1
 
-# Обрабатываем пол пользователя
-def last_name(update, _): # не закончено
+# Обрабатываем выбор пользователя
+def parse_choise(update, _):
+    write_log(update, _)
+    choise = update.message.text
+    print('Выбор равен', choise )
+    if choise == 'Add contact':
+        return ADD 
+    elif choise == 'Find contact':
+        return FIND
+    elif choise == 'Delete contact':
+        return DELETE
+    elif choise == 'Change contact':
+        return CHANGE
+    else:        
+        return MENU
+    
+
+def add(update, _):
+    # определяем пользователя
+    write_log(update, _)
+    user = update.message.from_user
+    # Пишем в журнал биографию или рассказ пользователя
+    logger.info("Пользователь %s выбрал: %s", user.first_name, update.message.text)
+    # Отвечаем на то что пользователь рассказал.
+    update.message.reply_text('Вы выбрали добавить контакт'
+        'Команда /choise, чтобы перейти к меню.\n'
+        'Команда /cancel, чтобы завершить.\n')
+    # возвращаемся к меню
+    return 
+
+def find(update, _):
     # определяем пользователя
     user = update.message.from_user
-    # Пишем в журнал  
-    
-    # Следующее сообщение с удалением клавиатуры `ReplyKeyboardRemove`
-    update.message.reply_text(
-        'Хорошо. Пришли мне свою фотографию, чтоб я знал как ты '
-        'выглядишь, или отправь /skip, если стесняешься.',
-        reply_markup=ReplyKeyboardRemove(),
-    )    
-    return ConversationHandler.END
-    # return 2
+    # Пишем в журнал биографию или рассказ пользователя
+    logger.info("Пользователь %s рассказал: %s", user.first_name, update.message.text)
+    # Отвечаем на то что пользователь рассказал.
+    update.message.reply_text('Вы выбрали найти контакт'
+        'Команда /choise, чтобы перейти к меню.\n'
+        'Команда /cancel, чтобы завершить.\n')
+    # возвращаемся к меню
+    return 
 
-# def bio(update, _):
-#     # определяем пользователя
-#     user = update.message.from_user
-#     # Пишем в журнал биографию или рассказ пользователя
-#     write_log(update, _)
-#     logger.info("Пользователь %s рассказал: %s", user.first_name, update.message.text)
-#     # Отвечаем на то что пользователь рассказал.
-#     update.message.reply_text('Спасибо! Надеюсь, когда-нибудь снова сможем поговорить.')
-#     # Заканчиваем разговор.
-#     return ConversationHandler.END
+def change(update, _):
+    # определяем пользователя
+    user = update.message.from_user
+    # Пишем в журнал биографию или рассказ пользователя
+    logger.info("Пользователь %s рассказал: %s", user.first_name, update.message.text)
+    # Отвечаем на то что пользователь рассказал.
+    update.message.reply_text('Вы выбрали изменить контакт'
+        'Команда /choise, чтобы перейти к меню.\n'
+        'Команда /cancel, чтобы завершить.\n')
+    # возвращаемся к меню
+    return 
 
+def delete(update, _):
+    # определяем пользователя
+    user = update.message.from_user
+    # Пишем в журнал биографию или рассказ пользователя
+    logger.info("Пользователь %s рассказал: %s", user.first_name, update.message.text)
+    # Отвечаем на то что пользователь рассказал.
+    update.message.reply_text('Вы выбрали удалить контакт'
+        'Команда /choise, чтобы перейти к меню.\n'
+        'Команда /cancel, чтобы завершить.\n')
+    # возвращаемся к меню
+    return 
 
 
 
@@ -101,20 +142,31 @@ if __name__ == '__main__':
 
 
     start_handler = CommandHandler('start', start)
-    choise_handler = CommandHandler('start', choise)
+   
     #add_handler = MessageHandler(Filters.regex('^(Add|Find|Delete|Change)$'), last_name)
 
     choise_handler = ConversationHandler(entry_points=[CommandHandler('choise', choise)],
-        states={
-            1:[MessageHandler(Filters.regex('^(Add|Find|Delete|Change)$'), last_name)],
-            2:[MessageHandler(Filters.text & ~Filters.command, start)],
+        states = {MENU:[MessageHandler(Filters.regex('^(Add contact|Find contact|Change contact|Delete contact)$'), parse_choise)],
+            ADD:[MessageHandler(Filters.text & ~Filters.command, add),
+                CommandHandler('choise', choise),],
+            FIND:[MessageHandler(Filters.text & ~Filters.command, find),
+                CommandHandler('choise', choise),],
+            CHANGE:[MessageHandler(Filters.text & ~Filters.command, change),
+                CommandHandler('choise', choise),],
+            DELETE:[MessageHandler(Filters.text & ~Filters.command, delete),
+                CommandHandler('choise', choise),],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
 
+    #test_handler = MessageHandler(Filters.regex('^(Add contact|Find|Delete|Change)$'), parse_choise)
+    #parse_handler = 
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(choise_handler)
+    #dispatcher.add_handler(test_handler)
+    #dispatcher.add_handler(parse_handler)
+
     #dispatcher.add_handler(add_handler)
 
 
