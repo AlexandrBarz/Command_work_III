@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 # Определяем константы этапов разговора
 FIRSTNAME, LASTNAME, NUMBER, COMMENT = range(4)
-
+FIRSTNAME, LASTNAME, NUMBER, COMMENT = 2,3,4,5
 
 # функция обратного вызова точки входа в разговор
 def start(update, _):
@@ -137,7 +137,7 @@ def comment(update, _):
     write_list_to_csv('phone_db.csv', 'UTF-8', user_data)
 
     # Заканчиваем разговор.
-    return ConversationHandler.END
+    return 0
 
 
 def write_list_to_csv(path_file: str, coding: str, list_to_write: List[str]):
