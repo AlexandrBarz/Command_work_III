@@ -92,3 +92,18 @@ def string_to_list(string_line: str) -> List[List[str]]:
         list_file.append(i.split(' '))
     return(list_file)
 
+def list_to_string(list_file: List[List[str]])-> str:
+    """
+    Возвращает строку вида  item_1\\nitem_2\\n....\\item_n\\n
+
+    Args:
+    List[List[str]] - список списков вид [[1,2,3],[1,2,3],[1,2,3]]
+
+    Returns:
+    str - строка (item_1\\nitem_2\\n....\\item_n\\n)
+    """
+    srting =''
+    for row in list_file:
+        if row[0] != "":   
+            srting += row[0]+' '+row[1]+' '+row[2]+' '+row[3]+'\n'        
+    return srting[:-1]
