@@ -1,5 +1,6 @@
 import logging
-import add_contact, change
+from add_contact import *
+from change import *
 from config import TOKEN 
 
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
@@ -12,8 +13,8 @@ from telegram.ext import (
 )
 
 # Определяем константы этапов разговора
-MENU, ADD, FIND, CHANGE, DELETE = range(5)
-
+MENU, ADD, ADD_FIRSTNAME, ADD_LASTNAME, ADD_NUMBER, ADD_COMMENT, FIND, START_CHANGE, END_CHANGE, DELETE = range(10)
+# 0     1         2           3             4           5           6       7        8           9
 # Включим ведение журнала
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -64,51 +65,44 @@ def choise(update, _):
 def parse_choise(update, _):
 # Обрабатываем выбор пользователя    
     choise = update.message.text        
-    if choise == 'Add contact':          
-        return ADD 
+    if choise == 'Add contact':
+        update.message.reply_text('Вы выбрали Добавить контакт\n'        
+        'Введите фамилию абонента.\n')
+        return ADD_FIRSTNAME
     elif choise == 'Find contact':
+        update.message.reply_text(
+        "Вы выбрали 'Найти контакт'.\n Введите фамилию и/или имя контакта, который вы хотите найти"
+        "(через пробел)")
         return FIND
     elif choise == 'Delete contact':
         return DELETE
     elif choise == 'Change contact':
-        return CHANGE
+        update.message.reply_text(
+        "Вы зашли в режим редактирования.\n Введите фамилию и имя контакта, который вы хотите изменить"
+        "(через пробел)")
+        return START_CHANGE
     else:        
         return MENU
-    
 
-def add(update, _):  
-    add_contact.add_contact()
+def message(update, _):  
+    update.message.reply_text(
+        "что-то пошло не так. попробуйте еще раз")        
     # возвращаемся к меню
-    return MENU 
-
-
-def change_h(update, _):    
-    change.change()
-    # возвращаемся к меню    
-    return MENU
-
-
-def find(update, _):
-    # костыль
-    logger.info("Пользователь %s рассказал: %s", user.first_name, update.message.text)
-    # Отвечаем на то что пользователь рассказал.
-    update.message.reply_text('Вы выбрали найти контакт'
-        'Команда /choise, чтобы перейти к меню.\n'
-        'Команда /cancel, чтобы завершить.\n')
-    # возвращаемся к меню
-    return MENU
+    return END_CHANGE
 
 def delete(update, _):
-    # костыль
-    logger.info("Пользователь %s рассказал: %s", user.first_name, update.message.text)
-    # Отвечаем на то что пользователь рассказал.
+    # костыль  #заглушка
     update.message.reply_text('Вы выбрали удалить контакт'
         'Команда /choise, чтобы перейти к меню.\n'
         'Команда /cancel, чтобы завершить.\n')
     # возвращаемся к меню
     return MENU
+  
 
-
+def find(update, _):  #заглушка
+    update.message.reply_text('Вы выбрали поиск контакта')
+    # возвращаемся к меню    
+    return MENU
 
 
 
@@ -123,28 +117,40 @@ if __name__ == '__main__':
 
     choise_handler = ConversationHandler(entry_points=[CommandHandler('choise', choise)],
         states = {MENU:[MessageHandler(Filters.regex('^(Add contact|Find contact|Change contact|Delete contact)$'), parse_choise)],
-            ADD:[MessageHandler(Filters.text & ~Filters.command, add),
+            # ADD:[MessageHandler(Filters.text & ~Filters.command, add_contact),
+            #     CommandHandler('choise', choise),],
+            ADD_FIRSTNAME: [MessageHandler(Filters.text, firstname)],
+            ADD_LASTNAME: [MessageHandler(Filters.text, lastname), CommandHandler('skip', skip_lastname)],
+            ADD_NUMBER: [MessageHandler(Filters.text, number)],
+            ADD_COMMENT: [MessageHandler(Filters.text & ~Filters.command, comment)],
+
+            FIND:[MessageHandler(Filters.text, find),
                 CommandHandler('choise', choise),],
-            FIND:[MessageHandler(Filters.text & ~Filters.command, find),
+
+
+            START_CHANGE:[MessageHandler(Filters.text, get_message),
                 CommandHandler('choise', choise),],
-            CHANGE:[MessageHandler(Filters.text & ~Filters.command, change_h),
-                CommandHandler('choise', choise),],
+            END_CHANGE: [CommandHandler('edit', edit),
+                CommandHandler('choise', choise), 
+                MessageHandler(Filters.text, message),],    
+
+
+
+
             DELETE:[MessageHandler(Filters.text & ~Filters.command, delete),
                 CommandHandler('choise', choise),],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
 
-    #test_handler = MessageHandler(Filters.regex('^(Add contact|Find|Delete|Change)$'), parse_choise)
-    #parse_handler = 
-
+  
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(choise_handler)
     #dispatcher.add_handler(test_handler)
-    #dispatcher.add_handler(parse_handler)
-
+ 
     
 
     # Запуск бота
+    print('по-е-е-ехали')
     updater.start_polling()
     updater.idle()
