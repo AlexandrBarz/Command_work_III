@@ -1,6 +1,8 @@
 import logging
 from add_contact import *
 from change import *
+from de import *
+from ad import *
 from config import TOKEN 
 
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
@@ -13,8 +15,8 @@ from telegram.ext import (
 )
 
 # Определяем константы этапов разговора
-MENU, ADD, ADD_FIRSTNAME, ADD_LASTNAME, ADD_NUMBER, ADD_COMMENT, FIND, START_CHANGE, END_CHANGE, DELETE = range(10)
-# 0     1         2           3             4           5           6       7        8           9
+MENU, ADD, ADD_FIRSTNAME, ADD_LASTNAME, ADD_NUMBER, ADD_COMMENT, FIND, START_CHANGE, END_CHANGE, DELETE, END_DELETE = range(11)
+# 0     1         2           3             4           5           6       7        8           9         10
 # Включим ведение журнала
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -40,11 +42,11 @@ def start(update, _):
     # Начинаем разговор
     update.message.reply_text(
         'Я Бот-справочник. '
-        'Команда /choise, чтобы перейти к меню.\n'
+        'Команда /choice, чтобы перейти к меню.\n'
         'Команда /cancel, чтобы завершить.\n') 
     #return GENDER
 
-def choise(update, _):
+def choice(update, _):
     # Список кнопок для ответа  
     reply_keyboard = [['Add contact', 'Find contact', 'Change contact', 'Delete contact']]
     # Создаем простую клавиатуру для ответа
@@ -52,46 +54,42 @@ def choise(update, _):
     # Начинаем разговор с вопроса
     update.message.reply_text(
         'Я Бот - телефонный справочник.\n'
-        'Выбери что ты хочешь сделать.'
+        'Выбери, что ты хочешь сделать.'
         'Команда /cancel, чтобы завершить.\n\n'
-        'что будем делать?',
+        'Что будем делать?',
         reply_markup=markup_key,)
     # переходим к этапу `GENDER`, это значит, что ответ
     # отправленного сообщения в виде кнопок будет список 
     # обработчиков, определенных в виде значения ключа `GENDER`
     return MENU
 
-    ### для вставки при возврате к меню
-    # update.message.reply_text(
-    #     'Я Бот - телефонный справочник.\n'
-    #     'Выбери что ты хочешь сделать.'
-    #     'Команда /cancel, чтобы завершить.\n\n'
-    #     'что будем делать?',
-    #     reply_markup=ReplyKeyboardMarkup([['Add contact', 'Find contact', 'Change contact', 'Delete contact']], one_time_keyboard=True),)
 
-def parse_choise(update, _):
+def parse_choice(update, _):
 # Обрабатываем выбор пользователя    
-    choise = update.message.text        
-    if choise == 'Add contact':
-        update.message.reply_text('Вы выбрали Добавить контакт\n'        
+    choice = update.message.text        
+    if choice == 'Add contact':
+        update.message.reply_text('Вы выбрали "Добавить контакт"\n'        
         'Введите фамилию абонента.\n' , reply_markup=ReplyKeyboardRemove(),)
         return ADD_FIRSTNAME
-    elif choise == 'Find contact':
+    elif choice == 'Find contact':
         update.message.reply_text(
-        "Вы выбрали 'Найти контакт'.\n Введите фамилию и/или имя контакта, который вы хотите найти"
+        "Вы выбрали 'Найти контакт'.\nВведите фамилию и/или имя контакта, который вы хотите найти"
         "(через пробел)", reply_markup=ReplyKeyboardRemove(),)
         return FIND
-    elif choise == 'Delete contact':
+    elif choice == 'Delete contact':
         update.message.reply_text(
-        "Вы выбрали 'Удалить контакт'.\n Введите фамилию и/или имя контакта, который вы хотите удалить"
+        "Вы выбрали 'Удалить контакт'.\nВведите фамилию и/или имя контакта, который вы хотите удалить"
         "(через пробел)", reply_markup=ReplyKeyboardRemove(),)
         return DELETE
-    elif choise == 'Change contact':
+    elif choice == 'Change contact':
         update.message.reply_text(
-        "Вы зашли в режим редактирования.\n Введите фамилию и имя контакта, который вы хотите изменить"
+        "Вы зашли в режим редактирования.\nВведите фамилию и имя контакта, который вы хотите изменить"
         "(через пробел)", reply_markup=ReplyKeyboardRemove(),)
         return START_CHANGE
-    else:        
+    else:
+        update.message.reply_text('Выбери, что ты хочешь сделать.'
+        'Команда /cancel, чтобы завершить.\n\n',
+        reply_markup=ReplyKeyboardMarkup([['Add contact', 'Find contact', 'Change contact', 'Delete contact']], one_time_keyboard=True),)
         return MENU
 
 def message(update, _):  
@@ -99,66 +97,44 @@ def message(update, _):
         "что-то пошло не так. попробуйте еще раз")        
     # возвращаемся к меню
     return END_CHANGE
-
-def delete(update, _):
-    # костыль  #заглушка
-    update.message.reply_text('Вы выбрали удалить контакт'
-        'Команда /choise, чтобы перейти к меню.\n'
-        'Команда /cancel, чтобы завершить.\n')
-    # возвращаемся к меню
-    return MENU
   
-
-def find(update, _):  #заглушка
-    update.message.reply_text('Вы выбрали поиск контакта')
-    # возвращаемся к меню    
-    return MENU
-
-
 
 
 if __name__ == '__main__':
-    # Создаем Updater и передаем ему токен вашего бота.
-    updater = Updater(TOKEN)
-    # получаем диспетчера для регистрации обработчиков
+    
+    updater = Updater(TOKEN)    
     dispatcher = updater.dispatcher
 
     start_handler = CommandHandler('start', start)      
 
-    choise_handler = ConversationHandler(entry_points=[CommandHandler('choise', choise)],
-        states = {MENU:[MessageHandler(Filters.regex('^(Add contact|Find contact|Change contact|Delete contact)$'), parse_choise)],
-            # ADD:[MessageHandler(Filters.text & ~Filters.command, add_contact),
-            #     CommandHandler('choise', choise),],
-            ADD_FIRSTNAME: [MessageHandler(Filters.text, firstname)],
-            ADD_LASTNAME: [MessageHandler(Filters.text, lastname), CommandHandler('skip', skip_lastname)],
-            ADD_NUMBER: [MessageHandler(Filters.text, number)],
+    choice_handler = ConversationHandler(entry_points=[CommandHandler('choice', choice)],
+        states = {MENU:[MessageHandler(Filters.regex('^(Add contact|Find contact|Change contact|Delete contact)$'), parse_choice)],
+            # ADD:[MessageHandler(Filters.text & ~Filters.command, add_contact), CommandHandler('choice', choice),],
+            ADD_FIRSTNAME: [MessageHandler(Filters.text & ~Filters.command, firstname)],
+            ADD_LASTNAME: [MessageHandler(Filters.text & ~Filters.command, lastname), CommandHandler('skip', skip_lastname)],
+            ADD_NUMBER: [MessageHandler(Filters.text & ~Filters.command, number)],
             ADD_COMMENT: [MessageHandler(Filters.text & ~Filters.command, comment)],
 
-            FIND:[MessageHandler(Filters.text, find),
-                CommandHandler('choise', choise),],
+            FIND:[MessageHandler(Filters.text & ~Filters.command, find_contact),
+                CommandHandler('choice', choice),],
 
-
-            START_CHANGE:[MessageHandler(Filters.text, get_message),
-                CommandHandler('choise', choise),],
+            START_CHANGE:[MessageHandler(Filters.text& ~Filters.command, get_message),
+                CommandHandler('choice', choice),],
             END_CHANGE: [CommandHandler('edit', edit),
-                CommandHandler('choise', choise), 
-                MessageHandler(Filters.text, message),],    
+                CommandHandler('choice', choice), 
+                MessageHandler(Filters.text & ~Filters.command, message),],  
 
-
-
-
-            DELETE:[MessageHandler(Filters.text & ~Filters.command, delete),
-                CommandHandler('choise', choise),],
+            DELETE:[MessageHandler(Filters.text & ~Filters.command, del_contact),
+                CommandHandler('choice', choice),],
+            END_DELETE:[CommandHandler('Yes', check), CommandHandler('No', check),
+                CommandHandler('choice', choice),],    
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
-
   
     dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(choise_handler)
-    #dispatcher.add_handler(test_handler)
- 
-    
+    dispatcher.add_handler(choice_handler)
+   
 
     # Запуск бота
     print('по-е-е-ехали')

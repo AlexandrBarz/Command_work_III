@@ -59,7 +59,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Определяем константы этапов разговора
-FIRSTNAME, LASTNAME, NUMBER, COMMENT = range(4)
+# FIRSTNAME, LASTNAME, NUMBER, COMMENT = range(4)
 FIRSTNAME, LASTNAME, NUMBER, COMMENT = 2,3,4,5
 
 # функция обратного вызова точки входа в разговор
@@ -137,11 +137,8 @@ def comment(update, _):
     write_list_to_csv('phone_db.csv', 'UTF-8', user_data)
 
     # Заканчиваем разговор.
-    update.message.reply_text(
-        'Я Бот - телефонный справочник.\n'
-        'Выбери что ты хочешь сделать.'
-        'Команда /cancel, чтобы завершить.\n\n'
-        'что будем делать?',
+    update.message.reply_text('Выбери, что ты хочешь сделать.\n'
+        'Команда /cancel, чтобы завершить.\n',
         reply_markup=ReplyKeyboardMarkup([['Add contact', 'Find contact', 'Change contact', 'Delete contact']], one_time_keyboard=True),)
     return 0
 

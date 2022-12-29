@@ -27,12 +27,9 @@ def edit(update: Update, context: CallbackContext):
     data = read_from_csv('phone_db.csv', 'UTF-8', '|')
     data.append(text)
     write_list_to_csv('phone_db.csv', 'UTF-8', data)
-    # update.message.reply_text(f'{text}')    
-    update.message.reply_text(f'{text} Контакт успешно изменён и добавлен в БД\n')
-    update.message.reply_text('Я Бот - телефонный справочник.\n'
-        'Выбери что ты хочешь сделать.'
-        'Команда /cancel, чтобы завершить.\n\n'
-        'что будем делать?',
+    update.message.reply_text(f'{text}\nКонтакт успешно изменён и добавлен в БД\n'
+        'Выбери, что ты хочешь сделать.\n'
+        'Команда /cancel, чтобы завершить.\n',
         reply_markup=ReplyKeyboardMarkup([['Add contact', 'Find contact', 'Change contact', 'Delete contact']], one_time_keyboard=True),)
     return MENU
 
@@ -47,7 +44,7 @@ def get_message(update: Update, context: CallbackContext):
     for item in data:
         if message[0].capitalize() in item[0] or message[1].capitalize() in item[1]:
             find.append(item)
-            #data.remove(item)
+            data.remove(item)
             update.message.reply_text(f"Контакт для редактирования найден\n{find}"
                                         f"\nВведите новые данные как в примере\n"
                                         f"'/edit Фамилия Имя Тел Коммент'")
