@@ -54,32 +54,42 @@ def choise(update, _):
         'Я Бот - телефонный справочник.\n'
         'Выбери что ты хочешь сделать.'
         'Команда /cancel, чтобы завершить.\n\n'
-        'что быдем делать?',
+        'что будем делать?',
         reply_markup=markup_key,)
     # переходим к этапу `GENDER`, это значит, что ответ
     # отправленного сообщения в виде кнопок будет список 
     # обработчиков, определенных в виде значения ключа `GENDER`
     return MENU
 
+    ### для вставки при возврате к меню
+    # update.message.reply_text(
+    #     'Я Бот - телефонный справочник.\n'
+    #     'Выбери что ты хочешь сделать.'
+    #     'Команда /cancel, чтобы завершить.\n\n'
+    #     'что будем делать?',
+    #     reply_markup=ReplyKeyboardMarkup([['Add contact', 'Find contact', 'Change contact', 'Delete contact']], one_time_keyboard=True),)
 
 def parse_choise(update, _):
 # Обрабатываем выбор пользователя    
     choise = update.message.text        
     if choise == 'Add contact':
         update.message.reply_text('Вы выбрали Добавить контакт\n'        
-        'Введите фамилию абонента.\n')
+        'Введите фамилию абонента.\n' , reply_markup=ReplyKeyboardRemove(),)
         return ADD_FIRSTNAME
     elif choise == 'Find contact':
         update.message.reply_text(
         "Вы выбрали 'Найти контакт'.\n Введите фамилию и/или имя контакта, который вы хотите найти"
-        "(через пробел)")
+        "(через пробел)", reply_markup=ReplyKeyboardRemove(),)
         return FIND
     elif choise == 'Delete contact':
+        update.message.reply_text(
+        "Вы выбрали 'Удалить контакт'.\n Введите фамилию и/или имя контакта, который вы хотите удалить"
+        "(через пробел)", reply_markup=ReplyKeyboardRemove(),)
         return DELETE
     elif choise == 'Change contact':
         update.message.reply_text(
         "Вы зашли в режим редактирования.\n Введите фамилию и имя контакта, который вы хотите изменить"
-        "(через пробел)")
+        "(через пробел)", reply_markup=ReplyKeyboardRemove(),)
         return START_CHANGE
     else:        
         return MENU

@@ -4,7 +4,7 @@ path = 'phone_db.csv'
 coding = 'UTF-8'
 
 from telegram.ext import Updater, CommandHandler, CallbackContext, Filters, MessageHandler
-from telegram import Update
+from telegram import Update, ReplyKeyboardMarkup
 
 from config import TOKEN
 
@@ -27,8 +27,13 @@ def edit(update: Update, context: CallbackContext):
     data = read_from_csv('phone_db.csv', 'UTF-8', '|')
     data.append(text)
     write_list_to_csv('phone_db.csv', 'UTF-8', data)
-    # update.message.reply_text(f'{text}')
-    update.message.reply_text(f'{text} Контакт успешно изменён и добавлен в БД')
+    # update.message.reply_text(f'{text}')    
+    update.message.reply_text(f'{text} Контакт успешно изменён и добавлен в БД\n')
+    update.message.reply_text('Я Бот - телефонный справочник.\n'
+        'Выбери что ты хочешь сделать.'
+        'Команда /cancel, чтобы завершить.\n\n'
+        'что будем делать?',
+        reply_markup=ReplyKeyboardMarkup([['Add contact', 'Find contact', 'Change contact', 'Delete contact']], one_time_keyboard=True),)
     return MENU
 
 def get_message(update: Update, context: CallbackContext):

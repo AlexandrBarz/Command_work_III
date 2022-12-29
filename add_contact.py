@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import CallbackContext
 from config import TOKEN
 
@@ -137,6 +137,12 @@ def comment(update, _):
     write_list_to_csv('phone_db.csv', 'UTF-8', user_data)
 
     # Заканчиваем разговор.
+    update.message.reply_text(
+        'Я Бот - телефонный справочник.\n'
+        'Выбери что ты хочешь сделать.'
+        'Команда /cancel, чтобы завершить.\n\n'
+        'что будем делать?',
+        reply_markup=ReplyKeyboardMarkup([['Add contact', 'Find contact', 'Change contact', 'Delete contact']], one_time_keyboard=True),)
     return 0
 
 
