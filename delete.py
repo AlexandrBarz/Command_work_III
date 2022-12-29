@@ -1,5 +1,5 @@
 from functions import read_from_csv, write_list_to_csv, list_to_string
-from telegram import Update
+from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler
 from config import TOKEN
 
@@ -15,10 +15,12 @@ def del_contact(update: Update, _):
             find.append(char)                        
             update.message.reply_text(f"Найден контакт:\n {list_to_string(find)}\n"
                 "Если хотитe удалить /Yes, иначе /No")
-            return
+            return 10
     else:
         update.message.reply_text(f"Ничего не удалось найти. Попробуйте еще раз\n"
         "Введите фамилию и/или имя контакта, который вы хотите удалить (через пробел)")
+        return 9
+
 
 def check(update: Update, _): 
     check = update.message.text        
@@ -28,6 +30,14 @@ def check(update: Update, _):
             phone_list.remove(find[i])
         write_list_to_csv('phone_db.csv', 'UTF-8', phone_list)
         update.message.reply_text(f'Удален контакт {list_to_string(find)}')
+
+
+    update.message.reply_text('Выбери что ты хочешь сделать.\n'
+            'Команда /cancel, чтобы завершить.\n\n'
+            'что будем делать?',
+            reply_markup=ReplyKeyboardMarkup([['Add contact', 'Find contact', 'Change contact', 'Delete contact']], one_time_keyboard=True),)
+
+    return 0         
     
 def delete():
     updater = Updater(TOKEN)
