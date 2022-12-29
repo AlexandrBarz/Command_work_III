@@ -1,7 +1,7 @@
 import logging
 from add_contact import *
 from change import *
-from de import *
+from delete import *
 from ad import *
 from config import TOKEN 
 
