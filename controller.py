@@ -2,7 +2,7 @@ import logging
 from add_contact import *
 from change import *
 from delete import *
-from ad import *
+from find import *
 from config import TOKEN 
 
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
